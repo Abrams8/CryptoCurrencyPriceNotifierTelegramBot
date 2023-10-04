@@ -5,11 +5,12 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 
 @Repository
 public class CoinDaoImpl implements CoinDao {
 
-    @PersistenceContext
+    @PersistenceContext(type = PersistenceContextType.EXTENDED)
     EntityManager entityManager;
 
     @Override
@@ -23,8 +24,9 @@ public class CoinDaoImpl implements CoinDao {
     }
 
     @Override
-    public Coin getCoinById(long id) {
-        return null;
+    public Coin getCoinById(Long coinId) {
+        Coin coin = entityManager.find(Coin.class, coinId);
+        return coin;
     }
 
     @Override

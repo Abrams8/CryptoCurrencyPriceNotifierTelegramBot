@@ -8,7 +8,7 @@ public interface CoinDao {
 
     void updateCoin(long id);
 
-    Coin getCoinById(long id);
+    Coin getCoinById(Long coinId);
 
     Coin getCoinBySymbol(String symbol);
 

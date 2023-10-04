@@ -4,7 +4,9 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "coins")
@@ -16,7 +18,7 @@ public class Coin {
 
     @Id
     @Column(name = "id")
-    Integer id;
+    Long id;
 
     @Column(name = "symbol")
     String symbol;
@@ -26,6 +28,12 @@ public class Coin {
 
     @Column(name = "price_usd")
     Double price_usd;
+
+//    @ManyToMany(cascade = CascadeType.ALL)
+//    @JoinTable(name = "coins_has_users",
+//            joinColumns = @JoinColumn(name = "coins_id", referencedColumnName = "id"),
+//            inverseJoinColumns = @JoinColumn(name = "users_user_id", referencedColumnName = "user_id"))
+//    private Set<User> users = new HashSet<>();
 
 
     @Override

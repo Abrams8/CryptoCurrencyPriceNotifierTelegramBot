@@ -1,33 +1,19 @@
 package abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.service;
 
 import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.config.BotConfig;
+import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.HashSet;
-import java.util.Set;
-
-@Component
 @RequiredArgsConstructor
+@Component
 public class TelegramBot extends TelegramLongPollingBot {
     private final BotConfig config;
-
-    private Set<Long> setChatId = new HashSet<>();
-
-    private int counter = 0;
-
-//    {
-//        for(int i = 0; i<10; i++){
-//            setChatId.add(4242l + i);
-//        }
-//    }
-
     @Autowired
     private CheckHavling checkHavling;
 
@@ -37,35 +23,53 @@ public class TelegramBot extends TelegramLongPollingBot {
             String messageText = update.getMessage().getText();
 
             long chatId = update.getMessage().getChatId();
+            User user = new User();
+            user.setUserId(update.getMessage().getChatId());
+            user.setUsername(update.getMessage().getChat().getUserName());
 
             switch (messageText) {
                 case "/start":
                     startCommandReceived(chatId);
-                    setChatId.add(chatId);
-                    System.out.println(setChatId);
+                    String message = checkHavling.safeNewUserService(user);
+                    System.out.println(message);
                     break;
                 case "/check":
                     sendMessage(chatId, checkHavling.toString());
                     break;
+                case "/follow":
+                    // checkHavling.saveSelectedCurrencies
+                    // sendMessage(chatId, checkHavling.toString());
+                    sendMessage(chatId, "Enter currency ID which you want to follow (example: id90): ");
+                    break;
                 default:
+
+                    if (messageText.matches("id\\d+")) {
+                        Long coinID = Long.valueOf(messageText.substring(2));
+                        System.out.println(coinID);
+
+                        checkHavling.followCurrency(user, coinID);
+                        System.out.println("Saved");
+                        break;
+                    }
+
                     sendMessage(chatId, "Sorry, command is not support yet)");
             }
         }
     }
 
-    @Scheduled(fixedDelay = 1000)
-    private void sendNotification() {
-        if (checkHavling.isResult()) {
-            for (Long a : setChatId) {
-                String message = "ВНИМАНИЕ!!\n" + checkHavling.toString().toUpperCase() + "\nХАЛВИНГ БЛИЗКО!! \nСДЕЛАЙ СИНХРОНИЗАЦИЮ НА SUNFLOWER LAND!!";
-                sendMessage(a, message);
-            }
-            counter++;
-            if (counter >= 3) {
-                setChatId.clear();
-            }
-        }
-    }
+//    @Scheduled(fixedDelay = 1000)
+//    private void sendNotification() {
+//        if (checkHavling.isResult()) {
+//            for (Long a : setChatId) {
+//                String message = "ВНИМАНИЕ!!\n" + checkHavling.toString().toUpperCase() + "\nХАЛВИНГ БЛИЗКО!! \nСДЕЛАЙ СИНХРОНИЗАЦИЮ НА SUNFLOWER LAND!!";
+//                sendMessage(a, message);
+//            }
+//            counter++;
+//            if (counter >= 3) {
+//                setChatId.clear();
+//            }
+//        }
+//    }
 
     @Override
     public String getBotUsername() {
