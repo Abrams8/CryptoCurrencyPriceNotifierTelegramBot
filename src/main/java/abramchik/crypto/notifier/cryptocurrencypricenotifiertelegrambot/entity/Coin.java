@@ -29,7 +29,7 @@ public class Coin {
     @Column(name = "price_usd")
     Double price_usd;
 
-//    @ManyToMany(cascade = CascadeType.ALL)
+//    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 //    @JoinTable(name = "coins_has_users",
 //            joinColumns = @JoinColumn(name = "coins_id", referencedColumnName = "id"),
 //            inverseJoinColumns = @JoinColumn(name = "users_user_id", referencedColumnName = "user_id"))

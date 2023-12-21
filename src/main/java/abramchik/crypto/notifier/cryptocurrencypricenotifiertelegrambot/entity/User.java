@@ -24,10 +24,9 @@ public class User implements Serializable {
     @Column(name = "username")
     String username;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "coins_has_users",
             joinColumns = @JoinColumn(name = "users_user_id", referencedColumnName = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "coins_id", referencedColumnName = "id"))
     Set<Coin> coins = new HashSet<>();
-
 }

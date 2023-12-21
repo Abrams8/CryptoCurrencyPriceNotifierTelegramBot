@@ -6,6 +6,7 @@ import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.dao.User
 import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.dao.UserDaoImpl;
 import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.Coin;
 import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.DataInfo;
+import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.TraceableCoin;
 import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.User;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Data
 @Transactional
@@ -50,7 +50,6 @@ public class CheckHavling {
             List<Coin> coinList1 = Arrays.asList(dataInfo1.getData());
 
             for (Coin coin : coinList1) {
-                //     System.out.println(coin.getId() + " - " + coin.getPrice_usd());
                 coinDao.safeCoin(coin);
             }
         }
@@ -63,8 +62,39 @@ public class CheckHavling {
         return userDao.safeUser(user);
     }
 
-    public String followCurrency(User user, Long coinId) {
-        userDao.followCoin(user, coinId);
+    public String followCurrency(User user, TraceableCoin traceableCoin) {
+        userDao.followCoin(user, traceableCoin);
         return "";
+    }
+
+    public Map<Long, Map<Long, Double>> checkFollowedCoins() {
+
+        List<TraceableCoin> allTraceableCoins = userDao.getAllTraceableCoins();
+        Map<Long, Double> allCoinIdAndCoinPrices = coinDao.getAllCoinIdAndCoinPrices();
+
+        Map<Long, Map<Long, Double>> notifyMap = new HashMap<>();
+        List<TraceableCoin> mustBeDeletedCoins = new ArrayList<>();
+
+        for (TraceableCoin traceableCoin : allTraceableCoins) {
+            Double actualPrice = allCoinIdAndCoinPrices.get(traceableCoin.getCoinId());
+
+            if(traceableCoin.getStopPoint() <= actualPrice && traceableCoin.getDirection()){
+                Map<Long, Double> coinIdAndActualPrice = new HashMap<>();
+                coinIdAndActualPrice.put(traceableCoin.getCoinId(), actualPrice);
+                notifyMap.put(traceableCoin.getUserId(), coinIdAndActualPrice);
+                mustBeDeletedCoins.add(traceableCoin);
+
+            }else if (traceableCoin.getStopPoint() >= actualPrice && !traceableCoin.getDirection()){
+                Map<Long, Double> coinIdAndActualPrice = new HashMap<>();
+                coinIdAndActualPrice.put(traceableCoin.getCoinId(), actualPrice);
+                notifyMap.put(traceableCoin.getUserId(), coinIdAndActualPrice);
+                mustBeDeletedCoins.add(traceableCoin);
+            }
+        }
+
+        for (TraceableCoin traceableCoin : mustBeDeletedCoins) {
+            coinDao.removeСoinTracking(traceableCoin);
+        }
+        return notifyMap;
     }
 }

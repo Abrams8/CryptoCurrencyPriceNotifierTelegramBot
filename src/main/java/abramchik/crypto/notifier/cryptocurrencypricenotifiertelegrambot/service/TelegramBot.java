@@ -1,14 +1,19 @@
 package abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.service;
 
 import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.config.BotConfig;
+import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.TraceableCoin;
 import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.util.Map;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Component
@@ -33,21 +38,27 @@ public class TelegramBot extends TelegramLongPollingBot {
                     String message = checkHavling.safeNewUserService(user);
                     System.out.println(message);
                     break;
-                case "/check":
-                    sendMessage(chatId, checkHavling.toString());
-                    break;
-                case "/follow":
-                    // checkHavling.saveSelectedCurrencies
-                    // sendMessage(chatId, checkHavling.toString());
-                    sendMessage(chatId, "Enter currency ID which you want to follow (example: id90): ");
+                case "/rules":
+                    sendMessage(chatId, "Enter currency ID which you want to follow, direction (UP '+' or DOWN '-'), stop point (example: id90+37540): ");
                     break;
                 default:
 
-                    if (messageText.matches("id\\d+")) {
-                        Long coinID = Long.valueOf(messageText.substring(2));
-                        System.out.println(coinID);
+                    if (messageText.matches("id\\d+[+-][0-9]+[.]?[0-9]*")) {
+                        messageText = messageText.substring(2);
 
-                        checkHavling.followCurrency(user, coinID);
+                        TraceableCoin traceableCoin = new TraceableCoin();
+
+                        if(messageText.contains("+")){
+                            traceableCoin.setDirection(true);
+                        }else {
+                            traceableCoin.setDirection(false);
+                        }
+
+                        String[] messageInfoToArray = messageText.split("-|\\+");
+                        traceableCoin.setCoinId(Long.valueOf(messageInfoToArray[0]));
+                        traceableCoin.setStopPoint(Double.valueOf(messageInfoToArray[1]));
+
+                        checkHavling.followCurrency(user, traceableCoin);
                         System.out.println("Saved");
                         break;
                     }
@@ -57,20 +68,18 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-//    @Scheduled(fixedDelay = 1000)
-//    private void sendNotification() {
-//        if (checkHavling.isResult()) {
-//            for (Long a : setChatId) {
-//                String message = "ВНИМАНИЕ!!\n" + checkHavling.toString().toUpperCase() + "\nХАЛВИНГ БЛИЗКО!! \nСДЕЛАЙ СИНХРОНИЗАЦИЮ НА SUNFLOWER LAND!!";
-//                sendMessage(a, message);
-//            }
-//            counter++;
-//            if (counter >= 3) {
-//                setChatId.clear();
-//            }
-//        }
-//    }
+    @Scheduled(fixedDelay = 1)
+    private void sendNotification() {
 
+            Map<Long, Map<Long, Double>> maaap = checkHavling.checkFollowedCoins();
+            if (!maaap.isEmpty()){
+                Set<Long> set = maaap.keySet();
+                for (Long aa: set) {
+                    maaap.get(aa);
+                    sendMessage(aa, maaap.get(aa).toString());
+                }
+            }
+    }
     @Override
     public String getBotUsername() {
         return config.getBotName();
@@ -82,10 +91,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void startCommandReceived(long chatId) {
-        String answer = "Приветствую! Данный бот пришлет вам уведомление," +
-                " когда total supply будет равен 29.990.000 sfl" +
-                " (халвинг произойдет на 30.000.000 sfl)." +
-                "\n\nЧтобы проверить текущий total supply введите /check\n\nGood luck!";
+        String answer = "Hi, I'm Crypto BOT! Lets earn some money :)";
         sendMessage(chatId, answer);
     }
 

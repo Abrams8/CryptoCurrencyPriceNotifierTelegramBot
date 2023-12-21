@@ -1,6 +1,10 @@
 package abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.dao;
 
 import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.Coin;
+import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.TraceableCoin;
+
+import java.util.List;
+import java.util.Map;
 
 public interface CoinDao {
 
@@ -14,7 +18,11 @@ public interface CoinDao {
 
     void addСoinTracking(String coinSymbol, Long userId);
 
-    void removeСoinTracking(String coinSymbol, Long userId);
+    void removeСoinTracking(TraceableCoin traceableCoin);
 
     void removeAllCoinTracking(Long userId);
+
+    List<Coin> getAllCoins();
+
+    Map<Long, Double> getAllCoinIdAndCoinPrices();
 }

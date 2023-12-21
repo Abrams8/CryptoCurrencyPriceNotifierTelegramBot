@@ -1,11 +1,18 @@
 package abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.dao;
 
 import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.Coin;
+import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.TraceableCoin;
+import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.User;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.Query;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 public class CoinDaoImpl implements CoinDao {
@@ -40,12 +47,32 @@ public class CoinDaoImpl implements CoinDao {
     }
 
     @Override
-    public void removeСoinTracking(String coinSymbol, Long userId) {
-
+    public void removeСoinTracking(TraceableCoin traceableCoin) {
+        TraceableCoin dd = entityManager.find(TraceableCoin.class, traceableCoin);
+        entityManager.remove(dd);
     }
 
     @Override
     public void removeAllCoinTracking(Long userId) {
 
+    }
+
+    @Override
+    public List<Coin> getAllCoins() {
+        List<Coin> allCoins = entityManager.createQuery("SELECT c from Coin c", Coin.class).getResultList();
+        return allCoins;
+    }
+
+    @Override
+    public Map<Long, Double> getAllCoinIdAndCoinPrices() {
+
+        List<Coin> allCoins = entityManager.createQuery("SELECT c from Coin c", Coin.class).getResultList();
+        Map<Long, Double> coinsIdAndPrice = new HashMap<>();
+
+        for (Coin coin : allCoins) {
+            coinsIdAndPrice.put(coin.getId(), coin.getPrice_usd());
+        }
+
+        return coinsIdAndPrice;
     }
 }
