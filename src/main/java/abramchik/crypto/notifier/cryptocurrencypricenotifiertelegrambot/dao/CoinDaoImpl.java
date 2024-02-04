@@ -2,19 +2,18 @@ package abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.dao;
 
 import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.Coin;
 import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.TraceableCoin;
-import abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.entity.User;
+import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import javax.persistence.Query;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Repository
+@Log4j
 public class CoinDaoImpl implements CoinDao {
 
     @PersistenceContext(type = PersistenceContextType.EXTENDED)
@@ -32,8 +31,12 @@ public class CoinDaoImpl implements CoinDao {
 
     @Override
     public Coin getCoinById(Long coinId) {
-        Coin coin = entityManager.find(Coin.class, coinId);
-        return coin;
+        try {
+            return entityManager.find(Coin.class, coinId);
+        } catch (Exception e) {
+            log.info("Something wrong in CoinDao(getCoinById): \n" + e.getMessage());
+            return null;
+        }
     }
 
     @Override
@@ -48,8 +51,13 @@ public class CoinDaoImpl implements CoinDao {
 
     @Override
     public void removeСoinTracking(TraceableCoin traceableCoin) {
-        TraceableCoin dd = entityManager.find(TraceableCoin.class, traceableCoin);
-        entityManager.remove(dd);
+        try {
+            TraceableCoin dd = entityManager.find(TraceableCoin.class, traceableCoin);
+            entityManager.remove(dd);
+        } catch (Exception e) {
+            log.info("Something wrong in CoinDao(removeСoinTracking): \n" + e.getMessage());
+        }
+
     }
 
     @Override
@@ -59,20 +67,28 @@ public class CoinDaoImpl implements CoinDao {
 
     @Override
     public List<Coin> getAllCoins() {
-        List<Coin> allCoins = entityManager.createQuery("SELECT c from Coin c", Coin.class).getResultList();
-        return allCoins;
+        try {
+            return entityManager.createQuery("SELECT c from Coin c", Coin.class).getResultList();
+        } catch (Exception e) {
+            log.info("Something wrong in CoinDao(getAllCoins): \n" + e.getMessage());
+            return null;
+        }
     }
 
     @Override
     public Map<Long, Double> getAllCoinIdAndCoinPrices() {
 
-        List<Coin> allCoins = entityManager.createQuery("SELECT c from Coin c", Coin.class).getResultList();
-        Map<Long, Double> coinsIdAndPrice = new HashMap<>();
+        try {
+            List<Coin> allCoins = entityManager.createQuery("SELECT c from Coin c", Coin.class).getResultList();
+            Map<Long, Double> coinsIdAndPrice = new HashMap<>();
 
-        for (Coin coin : allCoins) {
-            coinsIdAndPrice.put(coin.getId(), coin.getPrice_usd());
+            for (Coin coin : allCoins) {
+                coinsIdAndPrice.put(coin.getId(), coin.getPrice_usd());
+            }
+            return coinsIdAndPrice;
+        } catch (Exception e) {
+            log.info("Something wrong in CoinDao(getAllCoinIdAndCoinPrices): \n" + e.getMessage());
+            return null;
         }
-
-        return coinsIdAndPrice;
     }
 }

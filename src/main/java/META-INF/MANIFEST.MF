@@ -1,4 +1,3 @@
 Manifest-Version: 1.0
-Main-Class: abramchik.crypto.notifier.cryptocurrencypricenotifiertelegra
- mbot.CryptoCurrencyPriceNotifierTelegramBotApplication
+Main-Class: abramchik.crypto.notifier.cryptocurrencypricenotifiertelegrambot.CryptoCurrencyPriceNotifierTelegramBotApplication
 
