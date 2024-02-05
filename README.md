@@ -16,6 +16,6 @@ where 90 - coin ID*, plus(+) or minus(-) - direction, and the last number is pri
 
 Bot uses API from www.coinlore.com website. Every 5 second bot gets info about current prices and saves it to the database.
 
-*****coin IDs you can find on www.coinlore.com website.
+*coin IDs you can find on www.coinlore.com website.
 
 **Have a nice day! :)**
