@@ -1,5 +1,4 @@
-Hi! This application is working now. You can find and test it in the **Telegram** application, just write **@cryptoCurrencyPriceNotifierBot** ( or tap the link https://t.me/cryptoCurrencyPriceNotifierBot ).
-The application helps you follow cryptocurrencies, which you interested in, set prices and directions, and when real price will be the same as your price (more or less, it depends on direction), you will receive a notification about it.
+Hi! This application helps you follow cryptocurrencies, which you interested in, set prices and directions, and when real price will be the same as your price (more or less, it depends on direction), you will receive a notification about it.
 
 
 After **/start** command your telegram id will be added to the database and you can start working with the bot.
